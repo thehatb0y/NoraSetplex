@@ -2,13 +2,13 @@ import nora
 
 def main():
     #Service Token
-    token = "073827bd-b6ae-4541-b178-bbc4b74d6b97"
+    token = "token"
     #Service JSessionID
-    jsessionid = "ZThiNjU3ZTctMjA2Mi00ZWRlLWJkNTctMzI2MTNhYjdiNjA1"
+    jsessionid = "jsessionid"
     #Service StreamName
-    streamname = "unlimitedstreams"
+    streamname = "servicename"
     #Customer Test
-    customerID =  30189254
+    customerID =  "id"
     #Set the date to receive the credit 
     data= "2022-08-06T18:58"
     data = data[:-6]
