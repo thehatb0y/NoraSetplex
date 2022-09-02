@@ -12,8 +12,29 @@ def main():
     #Set the date to receive the credit 
     data= "2022-08-06T18:58"
     data = data[:-6]
-    #nora.noracheck(token, jsessionid, streamname, data, 1)
-    nora.duplicate(streamname, token, jsessionid, customerID)
+    daysToGive = 1
+    
+
+    r = 99
+    while r != 0:
+        print("Choose an option: ")
+        print("0 to exit")
+        print("1 to add time to a customer")
+        print("2 to duplicate a customer")
+
+        r = int(input())
+        if r == 2:
+            print("Type Customer ID")
+            customerID = int(input())
+            nora.duplicate(streamname, token, jsessionid, customerID)
+        elif r == 1:
+            print("Type How Many Days To Give")
+            daysToGive = int(input())
+            nora.add_time(streamname, token, jsessionid, data, daysToGive)
+        elif r == 0:
+            print("Exiting...")
+            exit()
+        
     
 if __name__ == "__main__":
     main()
