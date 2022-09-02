@@ -37,13 +37,13 @@ def set_duplicateAccPayload(username, password, firstname, lastname, email, phon
 def set_url(page, streamname):
     return f'https://{streamname}.norago.tv/nora/api/subscribers/?count=1000&disabled=&new=&page={page}&sort-by=lastName&sort-order=asc'
 
-def set_urlSubs(subid, streamname):
+def set_paymentUrl(subid, streamname):
     return f"https://{streamname}.norago.tv/nora/api/subscribers/{subid}/payments" 
 
-def set_checkCustomerUrl_subs(subid, streamname):
+def set_CustomerUrl(subid, streamname):
     return f"https://{streamname}.norago.tv/nora/api/subscribers/{subid}" 
 
-def set_subscribersUrl_subs(streamname):
+def set_subscribersUrl(streamname):
     return f"https://{streamname}.norago.tv/nora/api/subscribers/" 
 
 def set_deviceSlotUrl(subid, streamname):
@@ -56,7 +56,7 @@ def add_time(response, streamname, token, jsessionid, daystogive, fromp):
             if contact['expirationTime'][:-6] == fromp:
                 received_credit += 1
                 requests.request("POST", 
-                    set_urlSubs(contact['id'], streamname), 
+                    set_paymentUrl(contact['id'], streamname), 
                     headers = set_header(token, jsessionid, streamname, contact['id'], True, False, False),
                     data = set_setSubPayload(contact['id'], daystogive)
                 )
@@ -65,15 +65,15 @@ def add_time(response, streamname, token, jsessionid, daystogive, fromp):
                     f.write("\nID: " + str(contact['id']) + " Name: "+ str(contact['firstName']))
                     f.close()
     print(f"Received credit: {received_credit}")
-    
+
 def duplicate(streamname, token, jsessionid, customerID):
-    r = requests.get(set_checkCustomerUrl_subs(customerID, streamname), headers=set_header(token, jsessionid, streamname, 0, False, False, True))
+    r = requests.get(set_CustomerUrl(customerID, streamname), headers=set_header(token, jsessionid, streamname, 0, False, False, True))
     if r.status_code == 200:
         r = r.json()
         password = str(random.randint(100000000, 999999999))
 
         resp = requests.request("POST", 
-        set_subscribersUrl_subs(streamname), 
+        set_subscribersUrl(streamname), 
         headers = set_header(token, jsessionid, streamname, customerID, False, True, False),
         data = set_duplicateAccPayload(str(int(r['name'])+2), password, r['firstname'], r['lastname']+"2", r['email'], r['phone'], r['address'], r['city'], r['zipcode'], r['country'])
         )
@@ -88,7 +88,7 @@ def duplicate(streamname, token, jsessionid, customerID):
             )
         
         requests.request("POST", 
-            set_urlSubs(resp['id'], streamname), 
+            set_paymentUrl(resp['id'], streamname), 
             headers = set_header(token, jsessionid, streamname, resp['id'], True, False, False),
             data = set_setSubPayload(resp['id'], 30)
             )
@@ -103,7 +103,7 @@ def noracheck(token, jsessionid, streamname, fromp, daystogive):
     if response.status_code == 200:
         total_pages = response.json()['content']['totalPages']
     else:
-        print(response.status_code)
+        print("Error, check your connection:" + response.status_code)
         exit()
 
     time_init = time.time() 
@@ -111,7 +111,6 @@ def noracheck(token, jsessionid, streamname, fromp, daystogive):
     #Each page holds 1000 customers
     for page in range(page, total_pages + 1):
         print(f"Scrapping page {page}")
-        #t = threading.Thread(target=duplicate, args=(response, streamname, token, jsessionid))
         t = threading.Thread(target=add_time, args=(response, streamname, token, jsessionid, daystogive, fromp))
         t.start()
         response = requests.get(set_url(page, streamname), headers=set_header(token, jsessionid, streamname, 0, False, False, False))
