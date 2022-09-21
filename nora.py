@@ -1,3 +1,4 @@
+import json
 import random
 import threading
 import requests
@@ -100,10 +101,11 @@ def noracheck(token, jsessionid, streamname, fromp, daystogive):
     page = 0
     #Check if connection is working, if == 200 get the total pages
     response = requests.get(set_url(page, streamname), headers=set_header(token, jsessionid, streamname, 0, False, False, False))
+    
     if response.status_code == 200:
         total_pages = response.json()['content']['totalPages']
     else:
-        print("Error, check your connection:" + response.status_code)
+        print(f"Error, check your connection:{response.status_code}")
         exit()
 
     time_init = time.time() 
@@ -111,10 +113,41 @@ def noracheck(token, jsessionid, streamname, fromp, daystogive):
     #Each page holds 1000 customers
     for page in range(page, total_pages + 1):
         print(f"Scrapping page {page}")
+        #t = threading.Thread(target=duplicate, args=(response, streamname, token, jsessionid))
         t = threading.Thread(target=add_time, args=(response, streamname, token, jsessionid, daystogive, fromp))
         t.start()
         response = requests.get(set_url(page, streamname), headers=set_header(token, jsessionid, streamname, 0, False, False, False))
         page = response.json()['content']['number']
+    
+    while (threading.active_count() > 1):
+        time.sleep(1)
+
+    time_end = time.time()
+    print(f'Total time elapsed: {time_end - time_init}')   
+
+def noraJsonExport(token, jsessionid, streamname, fromp, daystogive):
+    #Page num, starts in 0
+    page = 0
+    #Check if connection is working, if == 200 get the total pages
+    response = requests.get(set_url(page, streamname), headers=set_header(token, jsessionid, streamname, 0, False, False, False))
+    
+    if response.status_code == 200:
+        total_pages = response.json()['content']['totalPages']
+    else:
+        print(f"Error, check your connection:{response.status_code}")
+        exit()
+
+    time_init = time.time() 
+    #Run all pages and check  through all the customerers. 
+    #Each page holds 1000 customers
+    for page in range(page, total_pages+1):
+        print(f"Exporting page {page}")
+        response = requests.get(set_url(page, streamname), headers=set_header(token, jsessionid, streamname, 0, False, False, False))
+        page = response.json()['content']['number']
+
+        with open(f'jsonExports/CustomersPage-{page}.json', 'w') as f:
+            json.dump(response.json()['content']['content'], f)
+            f.close()
     
     while (threading.active_count() > 1):
         time.sleep(1)
