@@ -5,6 +5,7 @@ Current Features
   * Add Sub time for all customers that's expired at predetermined data.
   * Duplicate Account and provide subtime
   * Multithreading added for Subscription Time feature
+  * Add Exporting Customers to JsonFiles
 
 Next Features
   * Remove all devices from customer # Pending
